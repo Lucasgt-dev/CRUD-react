@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 const emptyForm = {
   _id: null,
   name: '',
-  sku: '',
+  id: '',
   description: '',
   price: 0,
   stock: 0
@@ -47,7 +47,7 @@ export default function ProductsPage() {
   async function save() {
     const payload = {
       name: form.name,
-      sku: form.sku,
+      id: form.id,
       description: form.description,
       price: Number(form.price || 0),
       stock: Number(form.stock || 0)
@@ -86,7 +86,7 @@ export default function ProductsPage() {
 
       <DataTable value={items} paginator rows={10} stripedRows>
         <Column field="name" header="Nome" />
-        <Column field="sku" header="SKU" />
+        <Column field="id" header="ID" />
         <Column field="price" header="Preco" />
         <Column field="stock" header="Estoque" />
         {canManage && (
@@ -109,7 +109,7 @@ export default function ProductsPage() {
             <InputText value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
 
             <label>ID</label>
-            <InputText value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+            <InputText value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} />
 
             <label>Descricao</label>
             <InputText value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
