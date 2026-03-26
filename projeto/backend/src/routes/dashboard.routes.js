@@ -8,7 +8,7 @@ const router = Router();
 
 router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
     const [users, clients, products] = await Promise.all([
-        User.countDocuments(),
+        User.countDocuments({ role: { $ne: 'super' } }),
         Client.countDocuments(),
         Product.countDocuments()
     ]);
