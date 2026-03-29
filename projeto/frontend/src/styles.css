@@ -447,6 +447,42 @@ a {
   border-radius: 999px;
 }
 
+.row-actions {
+  justify-content: flex-start;
+}
+
+.access-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.access-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.access-label.is-on {
+  color: var(--success-strong);
+}
+
+.access-label.is-off {
+  color: var(--danger);
+}
+
+.access-action .p-inputswitch.p-highlight .p-inputswitch-slider {
+  background: var(--success);
+}
+
+.access-action .p-inputswitch:not(.p-highlight) .p-inputswitch-slider {
+  background: #cbd5e1;
+}
+
+.access-action .p-inputswitch .p-inputswitch-slider::before {
+  background: #ffffff;
+}
+
 .action-button {
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
@@ -466,13 +502,54 @@ a {
   color: #ffffff;
 }
 
+.action-activate {
+  color: var(--success);
+}
+
+.action-activate:hover {
+  background: var(--success);
+  color: #ffffff;
+}
+
+.action-deactivate {
+  color: var(--accent);
+}
+
+.action-deactivate:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
 .action-view:hover .p-button-icon,
 .action-view:hover .p-button-label,
 .action-edit:hover .p-button-icon,
 .action-edit:hover .p-button-label,
+.action-activate:hover .p-button-icon,
+.action-activate:hover .p-button-label,
+.action-deactivate:hover .p-button-icon,
+.action-deactivate:hover .p-button-label,
 .action-delete:hover .p-button-icon,
 .action-delete:hover .p-button-label {
   color: #ffffff;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.38rem 0.72rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.status-badge.is-active {
+  background: var(--success-soft);
+  color: var(--success-strong);
+}
+
+.status-badge.is-inactive {
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .p-button {
@@ -614,6 +691,7 @@ a {
   .grid-cards {
     grid-template-columns: 1fr;
   }
+
 }
 
 @media (max-width: 760px) {
@@ -680,4 +758,5 @@ a {
   .data-shell table {
     min-width: 620px;
   }
+
 }

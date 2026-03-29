@@ -166,6 +166,8 @@ export default function ProductsPage() {
           <Column header="Estoque" body={(row) => `${Number(row.stock || 0)} unidades`} />
           <Column
             header="Ações"
+            headerStyle={{ textAlign: 'center' }}
+            bodyStyle={{ textAlign: 'center' }}
             body={(row) => (
               <div className="row-actions">
                 <Button icon="pi pi-eye" text label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />

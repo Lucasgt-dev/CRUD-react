@@ -8,10 +8,15 @@ const router = Router();
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        const normalizedEmail = String(email ?? '').trim().toLowerCase();
 
-        const user = await User.findOne({ email, active: true });
+        const user = await User.findOne({ email: normalizedEmail });
         if(!user) {
             return res.status(401).json({ message: 'Usuário ou senha inválidos' });
+        }
+
+        if(!user.active) {
+            return res.status(403).json({ message: 'Seu acesso está desativado. Fale com um administrador.' });
         }
 
         const ok = await bcrypt.compare(password, user.passwordHash);

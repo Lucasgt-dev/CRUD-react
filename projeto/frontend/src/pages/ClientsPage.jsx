@@ -9,6 +9,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { InputMask } from 'primereact/inputmask';
+import { InputSwitch } from 'primereact/inputswitch';
 import { useAuth } from '../context/AuthContext';
 
 const emptyForm = {
@@ -142,6 +143,28 @@ export default function ClientsPage() {
     });
   }
 
+  async function toggleActive(row, nextActive = !row.active) {
+
+    await request(`/clients/${row._id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        document: row.document,
+        active: nextActive
+      })
+    });
+
+    await load();
+    toast.current?.show({
+      severity: nextActive ? 'success' : 'warn',
+      summary: nextActive ? 'Acesso ativado' : 'Acesso desativado',
+      detail: `${row.name} foi ${nextActive ? 'ativado' : 'desativado'} com sucesso.`,
+      life: 2500
+    });
+  }
+
   return (
     <div className="page">
       <Toast ref={toast} position="top-right" />
@@ -163,6 +186,14 @@ export default function ClientsPage() {
           <Column field="phone" header="Telefone" />
           <Column field="document" header="Documento (CPF)" />
           <Column
+            header="Status"
+            body={(row) => (
+              <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
+                {row.active === false ? 'Inativo' : 'Ativo'}
+              </span>
+            )}
+          />
+          <Column
             header="Ações"
             body={(row) => (
               <div className="row-actions">
@@ -172,6 +203,19 @@ export default function ClientsPage() {
               </div>
             )}
           />
+          {canManage && (
+            <Column
+              header="Acesso"
+              body={(row) => (
+                <div className="access-action">
+                  <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
+                  <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
+                    {row.active === false ? 'Desativado' : 'Ativado'}
+                  </span>
+                </div>
+              )}
+            />
+          )}
         </DataTable>
       </div>
 

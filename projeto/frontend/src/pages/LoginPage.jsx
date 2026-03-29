@@ -20,9 +20,10 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/');
     } catch (error) {
+      const inactiveAccess = error.message?.toLowerCase().includes('desativado');
       toast.current?.show({
-        severity: 'error',
-        summary: 'Falha no login',
+        severity: inactiveAccess ? 'warn' : 'error',
+        summary: inactiveAccess ? 'Acesso bloqueado' : 'Falha no login',
         detail: error.message,
         life: 3000
       });
