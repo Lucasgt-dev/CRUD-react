@@ -29,6 +29,10 @@ function isBlank(value) {
   return !String(value ?? '').trim();
 }
 
+function hasValidStock(value) {
+  return value !== null && value !== undefined && Number(value) > 0;
+}
+
 export default function ProductsPage() {
   const { user } = useAuth();
   const canManage = user?.role !== 'user';
@@ -72,7 +76,7 @@ export default function ProductsPage() {
       id: isBlank(form.id),
       description: isBlank(form.description),
       price: Number(form.price) <= 0,
-      stock: form.stock === null || form.stock === undefined || Number(form.stock) < 0
+      stock: !hasValidStock(form.stock)
     };
 
     if (Object.values(nextInvalidFields).some(Boolean)) {
@@ -80,7 +84,7 @@ export default function ProductsPage() {
       toast.current?.show({
         severity: 'warn',
         summary: 'Campos obrigatórios',
-        detail: 'Preencha nome, ID, descrição, preço e estoque corretamente antes de salvar.',
+        detail: 'Preencha nome, ID, descrição, preço e pelo menos 1 unidade em estoque antes de salvar.',
         life: 3000
       });
       return;

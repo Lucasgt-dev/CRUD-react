@@ -4,6 +4,10 @@ import { auth, permit } from '../middleware/auth.js';
 
 const router = Router();
 
+function hasValidStock(value) {
+  return value !== null && value !== undefined && Number(value) > 0;
+}
+
 // LISTAR: todos podem ver
 router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
   const products = await Product.find().sort({ createdAt: -1 });
@@ -12,12 +16,20 @@ router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
 
 // CRIAR: só super e adm
 router.post('/', auth, permit('super', 'adm'), async (req, res) => {
+  if (!hasValidStock(req.body.stock)) {
+    return res.status(400).json({ message: 'Informe pelo menos 1 unidade em estoque' });
+  }
+
   const product = await Product.create(req.body);
   res.status(201).json(product);
 });
 
 // EDITAR: só super e adm
 router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
+  if (!hasValidStock(req.body.stock)) {
+    return res.status(400).json({ message: 'Informe pelo menos 1 unidade em estoque' });
+  }
+
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
   res.json(product);
 });
