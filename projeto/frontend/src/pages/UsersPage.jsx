@@ -24,6 +24,14 @@ const emptyForm = {
   role: 'user'
 };
 
+function isBlank(value) {
+  return !String(value ?? '').trim();
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@([^\s@.]+\.)+[A-Za-z]{2,}$/.test(String(value ?? '').trim());
+}
+
 export default function UsersPage() {
   const { user } = useAuth();
   const canManage = user?.role !== 'user';
@@ -33,6 +41,7 @@ export default function UsersPage() {
   const [viewOpen, setViewOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [invalidFields, setInvalidFields] = useState({});
 
   async function load() {
     const data = await request('/users');
@@ -45,11 +54,13 @@ export default function UsersPage() {
 
   function newItem() {
     setForm(emptyForm);
+    setInvalidFields({});
     setOpen(true);
   }
 
   function editItem(row) {
     setForm({ ...row, password: '' });
+    setInvalidFields({});
     setOpen(true);
   }
 
@@ -59,6 +70,31 @@ export default function UsersPage() {
   }
 
   async function save() {
+    const needsPassword = !form._id;
+    const nextInvalidFields = {
+      name: isBlank(form.name),
+      email: isBlank(form.email) || !isValidEmail(form.email),
+      password: needsPassword && isBlank(form.password),
+      role: !form.role
+    };
+
+    if (Object.values(nextInvalidFields).some(Boolean)) {
+      setInvalidFields(nextInvalidFields);
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Campos obrigatórios',
+        detail: nextInvalidFields.email
+          ? 'Informe um e-mail válido antes de salvar.'
+          : needsPassword
+            ? 'Preencha nome, e-mail, senha e perfil antes de salvar.'
+            : 'Preencha nome, e-mail e perfil antes de salvar.',
+        life: 3000
+      });
+      return;
+    }
+
+    setInvalidFields({});
+
     const payload = {
       name: form.name,
       email: form.email,
@@ -158,23 +194,45 @@ export default function UsersPage() {
         <Dialog header="Usuario" visible={open} style={{ width: '30rem' }} onHide={() => setOpen(false)}>
           <div className="form-col">
             <label>Nome</label>
-            <InputText value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <InputText
+              className={invalidFields.name ? 'p-invalid' : ''}
+              value={form.name}
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                setInvalidFields((current) => ({ ...current, name: false }));
+              }}
+            />
 
             <label>E-mail</label>
             <InputText
               type="email"
+              className={invalidFields.email ? 'p-invalid' : ''}
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value.toLowerCase() })}
+              onChange={(e) => {
+                setForm({ ...form, email: e.target.value.toLowerCase() });
+                setInvalidFields((current) => ({ ...current, email: false }));
+              }}
             />
 
             <label>Senha</label>
-            <InputText value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+            <InputText
+              className={invalidFields.password ? 'p-invalid' : ''}
+              value={form.password}
+              onChange={(e) => {
+                setForm({ ...form, password: e.target.value });
+                setInvalidFields((current) => ({ ...current, password: false }));
+              }}
+            />
 
             <label>Perfil</label>
             <Dropdown
+              className={invalidFields.role ? 'p-invalid' : ''}
               value={form.role}
               options={roleOptions}
-              onChange={(e) => setForm({ ...form, role: e.value })}
+              onChange={(e) => {
+                setForm({ ...form, role: e.value });
+                setInvalidFields((current) => ({ ...current, role: false }));
+              }}
             />
 
             <Button label="Salvar" onClick={save} />

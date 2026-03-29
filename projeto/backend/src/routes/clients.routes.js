@@ -3,6 +3,11 @@ import Client from '../models/Client.js';
 import { auth, permit } from '../middleware/auth.js';
 
 const router = Router();
+const emailRegex = /^[^\s@]+@([^\s@.]+\.)+[A-Za-z]{2,}$/;
+
+function isValidEmail(value) {
+    return emailRegex.test(String(value ?? '').trim());
+}
 
 // LISTAR: todos podem ver
 router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
@@ -12,12 +17,20 @@ router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
 
 // CRIAR: só super e adm
 router.post('/', auth, permit('super', 'adm'), async (req, res) => {
+    if (!isValidEmail(req.body.email)) {
+        return res.status(400).json({ message: 'Informe um e-mail valido' });
+    }
+
     const client = await Client.create(req.body);
     res.status(201).json(client);
 });
 
 // EDITAR: só super e adm
 router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
+    if (!isValidEmail(req.body.email)) {
+        return res.status(400).json({ message: 'Informe um e-mail valido' });
+    }
+
     const client = await Client.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(client);
 });

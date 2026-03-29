@@ -4,6 +4,11 @@ import User from '../models/User.js';
 import { auth, permit } from '../middleware/auth.js';
 
 const router = Router();
+const emailRegex = /^[^\s@]+@([^\s@.]+\.)+[A-Za-z]{2,}$/;
+
+function isValidEmail(value) {
+  return emailRegex.test(String(value ?? '').trim());
+}
 
 // LISTAR: todos podem ver, exceto o perfil super que fica invisível no CRUD
 router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
@@ -18,6 +23,10 @@ router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
 router.post('/', auth, permit('super', 'adm'), async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Informe um e-mail valido' });
+    }
 
     if (role === 'super') {
       return res.status(403).json({ message: 'Nao e permitido criar usuarios super pelo CRUD' });
@@ -64,6 +73,10 @@ router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
 
     if (role === 'super') {
       return res.status(403).json({ message: 'Nao e permitido promover usuarios para super pelo CRUD' });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Informe um e-mail valido' });
     }
 
     const data = { name, email, role, active };

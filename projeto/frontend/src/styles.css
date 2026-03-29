@@ -452,18 +452,27 @@ a {
 }
 
 .action-view:hover {
-  background: var(--primary-soft);
-  color: var(--primary-strong);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .action-edit:hover {
-  background: var(--accent-soft);
-  color: #b45309;
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .action-delete:hover {
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.action-view:hover .p-button-icon,
+.action-view:hover .p-button-label,
+.action-edit:hover .p-button-icon,
+.action-edit:hover .p-button-label,
+.action-delete:hover .p-button-icon,
+.action-delete:hover .p-button-label {
+  color: #ffffff;
 }
 
 .p-button {
@@ -494,6 +503,20 @@ a {
 .p-dropdown {
   width: 100%;
   border-radius: 14px;
+}
+
+.p-inputtext.p-invalid,
+.p-inputnumber-input.p-invalid,
+.p-dropdown.p-invalid,
+.p-inputmask.p-invalid,
+.p-dropdown.p-invalid .p-dropdown-label,
+.p-dropdown.p-invalid .p-dropdown-trigger {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.p-dropdown.p-invalid {
+  overflow: hidden;
 }
 
 .p-inputtext,
@@ -560,6 +583,12 @@ a {
 }
 
 .p-toast .p-toast-message.p-toast-message-error {
+  background: linear-gradient(160deg, var(--danger), #b91c1c);
+  border: 1px solid transparent;
+  color: #ffffff;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
   background: linear-gradient(160deg, var(--danger), #b91c1c);
   border: 1px solid transparent;
   color: #ffffff;

@@ -20,6 +20,15 @@ const emptyForm = {
   stock: 0
 };
 
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+
+function isBlank(value) {
+  return !String(value ?? '').trim();
+}
+
 export default function ProductsPage() {
   const { user } = useAuth();
   const canManage = user?.role !== 'user';
@@ -29,6 +38,7 @@ export default function ProductsPage() {
   const [viewOpen, setViewOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [invalidFields, setInvalidFields] = useState({});
 
   async function load() {
     const data = await request('/products');
@@ -41,11 +51,13 @@ export default function ProductsPage() {
 
   function newItem() {
     setForm(emptyForm);
+    setInvalidFields({});
     setOpen(true);
   }
 
   function editItem(row) {
     setForm(row);
+    setInvalidFields({});
     setOpen(true);
   }
 
@@ -55,6 +67,27 @@ export default function ProductsPage() {
   }
 
   async function save() {
+    const nextInvalidFields = {
+      name: isBlank(form.name),
+      id: isBlank(form.id),
+      description: isBlank(form.description),
+      price: Number(form.price) <= 0,
+      stock: form.stock === null || form.stock === undefined || Number(form.stock) < 0
+    };
+
+    if (Object.values(nextInvalidFields).some(Boolean)) {
+      setInvalidFields(nextInvalidFields);
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Campos obrigatórios',
+        detail: 'Preencha nome, ID, descrição, preço e estoque corretamente antes de salvar.',
+        life: 3000
+      });
+      return;
+    }
+
+    setInvalidFields({});
+
     const payload = {
       name: form.name,
       id: form.id,
@@ -124,8 +157,9 @@ export default function ProductsPage() {
         <DataTable value={items} paginator rows={10} stripedRows className="data-shell">
           <Column field="name" header="Nome" />
           <Column header="ID" body={(row) => row.id || row._id} />
-          <Column field="price" header="Preco" />
-          <Column field="stock" header="Estoque" />
+          <Column field="description" header="Descrição" />
+          <Column header="Preço" body={(row) => currencyFormatter.format(Number(row.price || 0))} />
+          <Column header="Estoque" body={(row) => `${Number(row.stock || 0)} unidades`} />
           <Column
             header="Ações"
             body={(row) => (
@@ -150,11 +184,11 @@ export default function ProductsPage() {
           <label>Descricao</label>
           <InputText value={selectedItem?.description || ''} readOnly />
 
-          <label>Preco</label>
-          <InputText value={String(selectedItem?.price ?? '')} readOnly />
+          <label>Preço</label>
+          <InputText value={currencyFormatter.format(Number(selectedItem?.price || 0))} readOnly />
 
           <label>Estoque</label>
-          <InputText value={String(selectedItem?.stock ?? '')} readOnly />
+          <InputText value={`${Number(selectedItem?.stock || 0)} unidades`} readOnly />
         </div>
       </Dialog>
 
@@ -162,19 +196,54 @@ export default function ProductsPage() {
         <Dialog header="Produto" visible={open} style={{ width: '30rem' }} onHide={() => setOpen(false)}>
           <div className="form-col">
             <label>Nome</label>
-            <InputText value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <InputText
+              className={invalidFields.name ? 'p-invalid' : ''}
+              value={form.name}
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                setInvalidFields((current) => ({ ...current, name: false }));
+              }}
+            />
 
             <label>ID</label>
-            <InputText value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} />
+            <InputText
+              className={invalidFields.id ? 'p-invalid' : ''}
+              value={form.id}
+              onChange={(e) => {
+                setForm({ ...form, id: e.target.value });
+                setInvalidFields((current) => ({ ...current, id: false }));
+              }}
+            />
 
             <label>Descricao</label>
-            <InputText value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <InputText
+              className={invalidFields.description ? 'p-invalid' : ''}
+              value={form.description}
+              onChange={(e) => {
+                setForm({ ...form, description: e.target.value });
+                setInvalidFields((current) => ({ ...current, description: false }));
+              }}
+            />
 
-            <label>Preco</label>
-            <InputNumber value={form.price} onValueChange={(e) => setForm({ ...form, price: e.value })} />
+            <label>Preço</label>
+            <InputNumber
+              inputClassName={invalidFields.price ? 'p-invalid' : ''}
+              value={form.price}
+              onValueChange={(e) => {
+                setForm({ ...form, price: e.value });
+                setInvalidFields((current) => ({ ...current, price: false }));
+              }}
+            />
 
             <label>Estoque</label>
-            <InputNumber value={form.stock} onValueChange={(e) => setForm({ ...form, stock: e.value })} />
+            <InputNumber
+              inputClassName={invalidFields.stock ? 'p-invalid' : ''}
+              value={form.stock}
+              onValueChange={(e) => {
+                setForm({ ...form, stock: e.value });
+                setInvalidFields((current) => ({ ...current, stock: false }));
+              }}
+            />
 
             <Button label="Salvar" onClick={save} />
           </div>
