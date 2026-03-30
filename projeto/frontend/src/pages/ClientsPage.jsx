@@ -9,6 +9,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { InputMask } from 'primereact/inputmask';
+import { InputSwitch } from 'primereact/inputswitch';
 import { useAuth } from '../context/AuthContext';
 
 const TOAST_LIFE = 4200;
@@ -164,6 +165,28 @@ export default function ClientsPage() {
     });
   }
 
+  async function toggleActive(row, nextActive = !row.active) {
+
+    await request(`/clients/${row._id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        document: row.document,
+        active: nextActive
+      })
+    });
+
+    await load();
+    toast.current?.show({
+      severity: nextActive ? 'success' : 'warn',
+      summary: nextActive ? 'Acesso ativado' : 'Acesso desativado',
+      detail: `${row.name} foi ${nextActive ? 'ativado' : 'desativado'} com sucesso.`,
+      life: TOAST_SUCCESS_LIFE
+    });
+  }
+
   return (
     <div className="page">
       <Toast
@@ -222,6 +245,26 @@ export default function ClientsPage() {
               </div>
             )}
           />
+          {canManage && (
+            <Column
+              header="Acesso"
+              headerStyle={{ textAlign: 'center' }}
+              bodyStyle={{ textAlign: 'center' }}
+              headerClassName="control-column access-column"
+              bodyClassName="control-column-cell access-column"
+              style={{ width: '13rem' }}
+              body={(row) => (
+                <div className="table-control-cell">
+                  <div className="access-action">
+                    <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
+                    <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
+                      {row.active === false ? 'Desativado' : 'Ativado'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            />
+          )}
         </DataTable>
       </div>
 
