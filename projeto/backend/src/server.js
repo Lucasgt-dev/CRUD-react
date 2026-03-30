@@ -14,28 +14,43 @@ dotenv.config();
 
 const app = express();
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+function matchesAllowedOrigin(origin) {
+  return allowedOrigins.some((allowedOrigin) => {
+    if (allowedOrigin.includes('*')) {
+      const pattern = allowedOrigin
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/\\\*/g, '.*');
+
+      return new RegExp(`^${pattern}$`).test(origin);
+    }
+
+    return allowedOrigin === origin;
+  });
+}
 
 app.use(cors({
-    origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-
-        return callback(new Error('Origem não permitida pelo CORS'));
+  origin(origin, callback) {
+    if (!origin || matchesAllowedOrigin(origin)) {
+      return callback(null, true);
     }
+
+    return callback(new Error('Origem não permitida pelo CORS'));
+  }
 }));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
 app.get('/', (req, res) => {
-    res.json({ message: 'API rodando' });
+  res.json({ message: 'API rodando' });
 });
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
+  res.json({ status: 'ok' });
 });
 
 app.use('/api/auth', authRoutes);
@@ -47,7 +62,7 @@ app.use('/api/dashboard', dashboardRoutes);
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}`);
-    });
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+  });
 });
