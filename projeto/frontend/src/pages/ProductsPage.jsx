@@ -171,6 +171,7 @@ export default function ProductsPage() {
         ref={toast}
         position="top-right"
         baseZIndex={open || viewOpen ? 2600 : 1000}
+        appendTo={open || viewOpen ? document.body : 'self'}
         className={open || viewOpen ? 'toast-elevated' : ''}
       />
       <ConfirmDialog />
