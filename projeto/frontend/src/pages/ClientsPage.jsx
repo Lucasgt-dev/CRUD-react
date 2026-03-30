@@ -145,6 +145,16 @@ export default function ClientsPage() {
   }
 
   async function removeItem(row) {
+    if (row.active !== false) {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Desative o acesso antes de excluir',
+        detail: 'Só é possível excluir clientes com o acesso desativado.',
+        life: TOAST_LIFE
+      });
+      return;
+    }
+
     confirmDialog({
       message: `Deseja excluir ${row.name}?`,
       header: 'Confirmar exclusão',
@@ -153,14 +163,23 @@ export default function ClientsPage() {
       rejectLabel: 'Cancelar',
       acceptClassName: 'p-button-danger',
       accept: async () => {
-        await request(`/clients/${row._id}`, { method: 'DELETE' });
-        await load();
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Cliente removido',
-          detail: `${row.name} foi excluído com sucesso.`,
-          life: TOAST_SUCCESS_LIFE
-        });
+        try {
+          await request(`/clients/${row._id}`, { method: 'DELETE' });
+          await load();
+          toast.current?.show({
+            severity: 'error',
+            summary: 'Cliente removido',
+            detail: `${row.name} foi excluído com sucesso.`,
+            life: TOAST_SUCCESS_LIFE
+          });
+        } catch (error) {
+          toast.current?.show({
+            severity: 'warn',
+            summary: 'Exclusão não permitida',
+            detail: error.message || 'Desative o acesso do cliente antes de excluí-lo.',
+            life: TOAST_LIFE
+          });
+        }
       }
     });
   }

@@ -37,6 +37,16 @@ router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
 
 // EXCLUIR: só super e adm
 router.delete('/:id', auth, permit('super', 'adm'), async (req, res) => {
+    const targetClient = await Client.findById(req.params.id);
+
+    if (!targetClient) {
+        return res.status(404).json({ message: 'Cliente não encontrado' });
+    }
+
+    if (targetClient.active !== false) {
+        return res.status(400).json({ message: 'Só é possível excluir clientes com o acesso desativado' });
+    }
+
     await Client.findByIdAndDelete(req.params.id);
     res.json({ message: 'Cliente removido com sucesso' });
 });
