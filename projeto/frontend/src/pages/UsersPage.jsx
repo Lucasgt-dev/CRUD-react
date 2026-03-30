@@ -150,7 +150,7 @@ export default function UsersPage() {
   async function removeItem(row) {
     if (row.active !== false) {
       toast.current?.show({
-        severity: 'warn',
+        severity: 'error',
         summary: 'Desative o acesso antes de excluir',
         detail: 'Só é possível excluir usuários com o acesso desativado.',
         life: TOAST_LIFE
@@ -177,7 +177,7 @@ export default function UsersPage() {
           });
         } catch (error) {
           toast.current?.show({
-            severity: 'warn',
+            severity: 'error',
             summary: 'Exclusão não permitida',
             detail: error.message || 'Desative o acesso do usuário antes de excluí-lo.',
             life: TOAST_LIFE
