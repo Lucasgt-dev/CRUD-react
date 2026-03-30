@@ -172,7 +172,7 @@ export default function UsersPage() {
           toast.current?.show({
             severity: 'error',
             summary: 'Usuário removido',
-            detail: `${row.name} foi excluído com sucesso.`,
+            detail: `${row.name} foi excluído.`,
             life: TOAST_SUCCESS_LIFE
           });
         } catch (error) {

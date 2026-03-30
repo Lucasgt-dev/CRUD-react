@@ -158,7 +158,7 @@ export default function ProductsPage() {
         toast.current?.show({
           severity: 'error',
           summary: 'Produto removido',
-          detail: `${row.name} foi excluído com sucesso.`,
+          detail: `${row.name} foi excluído.`,
           life: TOAST_SUCCESS_LIFE
         });
       }
