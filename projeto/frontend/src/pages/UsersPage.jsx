@@ -150,7 +150,7 @@ export default function UsersPage() {
   async function removeItem(row) {
     if (row.active !== false) {
       toast.current?.show({
-        severity: 'error',
+        severity: 'warn',
         summary: 'Desative o acesso antes de excluir',
         detail: 'Só é possível excluir usuários com o acesso desativado.',
         life: TOAST_LIFE
@@ -170,14 +170,14 @@ export default function UsersPage() {
           await request(`/users/${row._id}`, { method: 'DELETE' });
           await load();
           toast.current?.show({
-            severity: 'success',
+            severity: 'error',
             summary: 'Usuário removido',
             detail: `${row.name} foi excluído com sucesso.`,
             life: TOAST_SUCCESS_LIFE
           });
         } catch (error) {
           toast.current?.show({
-            severity: 'error',
+            severity: 'warn',
             summary: 'Exclusão não permitida',
             detail: error.message || 'Desative o acesso do usuário antes de excluí-lo.',
             life: TOAST_LIFE

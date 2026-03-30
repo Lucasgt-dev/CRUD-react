@@ -1341,7 +1341,7 @@ a {
 }
 
 .p-toast .p-toast-message.p-toast-message-warn {
-  background: linear-gradient(160deg, var(--danger), #b91c1c);
+  background: linear-gradient(160deg, #f59e0b, #d97706);
   border: 1px solid transparent;
   color: #ffffff;
 }

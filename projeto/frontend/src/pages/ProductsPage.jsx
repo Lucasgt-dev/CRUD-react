@@ -156,7 +156,7 @@ export default function ProductsPage() {
         await request(`/products/${row._id}`, { method: 'DELETE' });
         await load();
         toast.current?.show({
-          severity: 'success',
+          severity: 'error',
           summary: 'Produto removido',
           detail: `${row.name} foi excluído com sucesso.`,
           life: TOAST_SUCCESS_LIFE
