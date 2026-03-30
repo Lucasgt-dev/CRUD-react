@@ -8,19 +8,28 @@ dotenv.config();
 async function seed() {
   await connectDB();
 
-  const exists = await User.findOne({ email: process.env.SUPER_EMAIL });
+  const email = String(process.env.SUPER_EMAIL ?? '').trim().toLowerCase();
+  const passwordHash = await bcrypt.hash(process.env.SUPER_PASSWORD, 10);
+
+  const exists = await User.findOne({ email });
   if (exists) {
-    console.log('Super usuário já existe');
+    exists.name = process.env.SUPER_NAME;
+    exists.email = email;
+    exists.passwordHash = passwordHash;
+    exists.role = 'super';
+    exists.active = true;
+    await exists.save();
+
+    console.log('Super usuário sincronizado com sucesso');
     process.exit(0);
   }
 
-  const passwordHash = await bcrypt.hash(process.env.SUPER_PASSWORD, 10);
-
   await User.create({
     name: process.env.SUPER_NAME,
-    email: process.env.SUPER_EMAIL,
+    email,
     passwordHash,
-    role: 'super'
+    role: 'super',
+    active: true
   });
 
   console.log('Super usuário criado com sucesso');
