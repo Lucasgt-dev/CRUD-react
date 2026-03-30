@@ -14,7 +14,7 @@ export default function AppMenu() {
   const userRoleClass = user?.role ? `role-${user.role}` : 'role-user';
   const links = [
     { to: '/', label: 'Dashboard' },
-    ...(user?.role === 'super' || user?.role === 'user' ? [{ to: '/users', label: 'Usuarios' }] : []),
+    ...(user?.role === 'super' || user?.role === 'user' ? [{ to: '/users', label: 'Usuários' }] : []),
     { to: '/clients', label: 'Clientes' },
     { to: '/products', label: 'Produtos' }
   ];

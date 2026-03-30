@@ -29,12 +29,12 @@ router.post('/', auth, permit('super', 'adm'), async (req, res) => {
     }
 
     if (role === 'super') {
-      return res.status(403).json({ message: 'Nao e permitido criar usuarios super pelo CRUD' });
+      return res.status(403).json({ message: 'Não é permitido criar usuários super pelo CRUD' });
     }
 
     const exists = await User.findOne({ email });
     if (exists) {
-      return res.status(400).json({ message: 'E-mail ja cadastrado' });
+      return res.status(400).json({ message: 'E-mail já cadastrado' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -53,7 +53,7 @@ router.post('/', auth, permit('super', 'adm'), async (req, res) => {
       role: user.role
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar usuario', error: error.message });
+    res.status(500).json({ message: 'Erro ao criar usuário', error: error.message });
   }
 });
 
@@ -64,15 +64,15 @@ router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
     const targetUser = await User.findById(req.params.id);
 
     if (!targetUser) {
-      return res.status(404).json({ message: 'Usuario nao encontrado' });
+      return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
     if (targetUser.role === 'super') {
-      return res.status(403).json({ message: 'Usuario super nao pode ser alterado pelo CRUD' });
+      return res.status(403).json({ message: 'Usuário super não pode ser alterado pelo CRUD' });
     }
 
     if (role === 'super') {
-      return res.status(403).json({ message: 'Nao e permitido promover usuarios para super pelo CRUD' });
+      return res.status(403).json({ message: 'Não é permitido promover usuários para super pelo CRUD' });
     }
 
     if (!isValidEmail(email)) {
@@ -90,7 +90,7 @@ router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao atualizar usuario', error: error.message });
+    res.status(500).json({ message: 'Erro ao atualizar usuário', error: error.message });
   }
 });
 
@@ -99,15 +99,15 @@ router.delete('/:id', auth, permit('super', 'adm'), async (req, res) => {
   const targetUser = await User.findById(req.params.id);
 
   if (!targetUser) {
-    return res.status(404).json({ message: 'Usuario nao encontrado' });
+    return res.status(404).json({ message: 'Usuário não encontrado' });
   }
 
   if (targetUser.role === 'super') {
-    return res.status(403).json({ message: 'Usuario super nao pode ser removido pelo CRUD' });
+    return res.status(403).json({ message: 'Usuário super não pode ser removido pelo CRUD' });
   }
 
   await User.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Usuario removido com sucesso' });
+  res.json({ message: 'Usuário removido com sucesso' });
 });
 
 export default router;

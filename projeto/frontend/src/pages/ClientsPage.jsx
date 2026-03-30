@@ -43,6 +43,7 @@ export default function ClientsPage() {
   const [form, setForm] = useState(emptyForm);
   const [selectedItem, setSelectedItem] = useState(null);
   const [invalidFields, setInvalidFields] = useState({});
+  const [saving, setSaving] = useState(false);
 
   async function load() {
     const data = await request('/clients');
@@ -56,12 +57,14 @@ export default function ClientsPage() {
   function newItem() {
     setForm(emptyForm);
     setInvalidFields({});
+    setSaving(false);
     setOpen(true);
   }
 
   function editItem(row) {
     setForm(row);
     setInvalidFields({});
+    setSaving(false);
     setOpen(true);
   }
 
@@ -71,6 +74,10 @@ export default function ClientsPage() {
   }
 
   async function save() {
+    if (saving) {
+      return;
+    }
+
     const nextInvalidFields = {
       name: isBlank(form.name),
       email: isBlank(form.email) || !isValidEmail(form.email),
@@ -92,6 +99,7 @@ export default function ClientsPage() {
     }
 
     setInvalidFields({});
+    setSaving(true);
 
     const payload = {
       name: form.name,
@@ -100,6 +108,7 @@ export default function ClientsPage() {
       document: form.document
     };
 
+    try {
     if (form._id) {
       await request(`/clients/${form._id}`, {
         method: 'PUT',
@@ -120,6 +129,16 @@ export default function ClientsPage() {
       detail: `${form.name} foi salvo com sucesso.`,
       life: 2500
     });
+    } catch (error) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Falha ao salvar',
+        detail: error.message || 'Não foi possível salvar o cliente.',
+        life: 3000
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function removeItem(row) {
@@ -187,31 +206,52 @@ export default function ClientsPage() {
           <Column field="document" header="Documento (CPF)" />
           <Column
             header="Status"
+            headerStyle={{ textAlign: 'center' }}
+            bodyStyle={{ textAlign: 'center' }}
+            headerClassName="control-column status-column"
+            bodyClassName="control-column-cell status-column"
+            style={{ width: '9rem' }}
             body={(row) => (
-              <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
-                {row.active === false ? 'Inativo' : 'Ativo'}
-              </span>
+              <div className="table-control-cell">
+                <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
+                  {row.active === false ? 'Inativo' : 'Ativo'}
+                </span>
+              </div>
             )}
           />
           <Column
             header="Ações"
+            headerStyle={{ textAlign: 'center' }}
+            bodyStyle={{ textAlign: 'center' }}
+            headerClassName="control-column actions-column"
+            bodyClassName="control-column-cell actions-column"
+            style={{ width: '10rem' }}
             body={(row) => (
-              <div className="row-actions">
-                <Button icon="pi pi-eye" text label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
-                {canManage && <Button icon="pi pi-pencil" text label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
-                {canManage && <Button icon="pi pi-trash" text severity="danger" label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+              <div className="table-control-cell">
+                <div className="row-actions">
+                  <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
+                  {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
+                  {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+                </div>
               </div>
             )}
           />
           {canManage && (
             <Column
               header="Acesso"
+              headerStyle={{ textAlign: 'center' }}
+              bodyStyle={{ textAlign: 'center' }}
+              headerClassName="control-column access-column"
+              bodyClassName="control-column-cell access-column"
+              style={{ width: '13rem' }}
               body={(row) => (
-                <div className="access-action">
-                  <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
-                  <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
-                    {row.active === false ? 'Desativado' : 'Ativado'}
-                  </span>
+                <div className="table-control-cell">
+                  <div className="access-action">
+                    <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
+                    <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
+                      {row.active === false ? 'Desativado' : 'Ativado'}
+                    </span>
+                  </div>
                 </div>
               )}
             />
@@ -281,7 +321,12 @@ export default function ClientsPage() {
               }}
             />
 
-            <Button label="Salvar" onClick={save} />
+            <Button
+              label={saving ? (form._id ? 'Editando...' : 'Salvando...') : (form._id ? 'Editar' : 'Salvar')}
+              loading={saving}
+              disabled={saving}
+              onClick={save}
+            />
           </div>
         </Dialog>
       )}

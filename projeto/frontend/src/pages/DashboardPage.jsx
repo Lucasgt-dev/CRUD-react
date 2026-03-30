@@ -18,18 +18,18 @@ export default function DashboardPage() {
         <section className="stats-hero">
           <h1>Dashboard</h1>
           <p>
-            Visualize rapidamente os principais dados do sistema e acompanhe usuarios,
-            clientes e produtos em um unico painel.
+            Visualize rapidamente os principais dados do sistema e acompanhe usuários,
+            clientes e produtos em um único painel.
           </p>
           <div className="hero-meta">
             <span className="hero-pill">Resumo em tempo real</span>
-            <span className="hero-pill">Navegacao simples e objetiva</span>
+            <span className="hero-pill">Navegação simples e objetiva</span>
           </div>
         </section>
 
         <div className="grid-cards">
           <div className="stat-card">
-            <Card title="Usuarios">
+            <Card title="Usuários">
               <h2 className="stat-value">{stats.users}</h2>
             </Card>
           </div>

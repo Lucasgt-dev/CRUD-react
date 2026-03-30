@@ -10,12 +10,18 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const toast = useRef(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
     try {
       await login(email, password);
       navigate('/');
@@ -27,24 +33,40 @@ export default function LoginPage() {
         detail: error.message,
         life: 3000
       });
+    } finally {
+      setSubmitting(false);
     }
   }
 
   return (
     <div className="center-screen">
       <Toast ref={toast} position="top-right" />
-      <section className="login-card login-card-compact">
-        <Card title="Login do Sistema">
-          <p className="login-subtitle">
-            Entre com suas credenciais para acessar o painel administrativo.
-          </p>
+      <section className="login-card login-card-compact login-card-modern">
+        <Card>
+          <div className="login-brand login-brand-shell">
+            <div className="brand-mark login-brand-mark">CR</div>
+            <div className="brand-copy">
+              <strong>CRUD React</strong>
+              <span>Painel operacional</span>
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className="form-col">
+          <div className="login-head">
+            <span className="login-kicker">Acesso seguro</span>
+            <h1 className="login-title">Login do Sistema</h1>
+            <p className="login-subtitle">
+              Entre com suas credenciais para acessar o painel administrativo.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="form-col login-form">
             <label>E-mail</label>
             <InputText
               type="email"
               placeholder="exemplo@empresa.com"
               value={email}
+              disabled={submitting}
+              autoComplete="email"
               onChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
 
@@ -54,12 +76,15 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Digite sua senha"
                 value={password}
+                disabled={submitting}
+                autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
                 className="password-field-input"
               />
               <button
                 type="button"
                 className="password-toggle"
+                disabled={submitting}
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
@@ -67,7 +92,19 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <Button type="submit" label="Entrar" icon="pi pi-sign-in" />
+            <Button
+              type="submit"
+              label={submitting ? 'Entrando...' : 'Entrar'}
+              icon={submitting ? undefined : 'pi pi-sign-in'}
+              loading={submitting}
+              disabled={submitting}
+              className="login-submit-button"
+            />
+
+            <div className="login-note">
+              <span className="login-note-dot" />
+              <span>Ambiente protegido para acesso administrativo.</span>
+            </div>
           </form>
         </Card>
       </section>

@@ -14,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
 
 const roleOptions = [
   { label: 'Administrador', value: 'adm' },
-  { label: 'Usuario', value: 'user' }
+  { label: 'Usuário', value: 'user' }
 ];
 
 const emptyForm = {
@@ -43,6 +43,7 @@ export default function UsersPage() {
   const [form, setForm] = useState(emptyForm);
   const [selectedItem, setSelectedItem] = useState(null);
   const [invalidFields, setInvalidFields] = useState({});
+  const [saving, setSaving] = useState(false);
 
   async function load() {
     const data = await request('/users');
@@ -56,12 +57,14 @@ export default function UsersPage() {
   function newItem() {
     setForm(emptyForm);
     setInvalidFields({});
+    setSaving(false);
     setOpen(true);
   }
 
   function editItem(row) {
     setForm({ ...row, password: '' });
     setInvalidFields({});
+    setSaving(false);
     setOpen(true);
   }
 
@@ -71,6 +74,10 @@ export default function UsersPage() {
   }
 
   async function save() {
+    if (saving) {
+      return;
+    }
+
     const needsPassword = !form._id;
     const nextInvalidFields = {
       name: isBlank(form.name),
@@ -95,6 +102,7 @@ export default function UsersPage() {
     }
 
     setInvalidFields({});
+    setSaving(true);
 
     const payload = {
       name: form.name,
@@ -103,26 +111,37 @@ export default function UsersPage() {
       ...(form.password ? { password: form.password } : {})
     };
 
-    if (form._id) {
-      await request(`/users/${form._id}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      });
-    } else {
-      await request('/users', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-    }
+    try {
+      if (form._id) {
+        await request(`/users/${form._id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      } else {
+        await request('/users', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
 
-    setOpen(false);
-    await load();
-    toast.current?.show({
+      setOpen(false);
+      await load();
+      toast.current?.show({
       severity: 'success',
       summary: form._id ? 'Usuário atualizado' : 'Usuário criado',
       detail: `${form.name} foi salvo com sucesso.`,
-      life: 2500
-    });
+        life: 2500
+      });
+    } catch (error) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Falha ao salvar',
+        detail: error.message || 'Não foi possível salvar o usuário.',
+        life: 3000
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function removeItem(row) {
@@ -176,10 +195,10 @@ export default function UsersPage() {
       <div className="page-content">
         <div className="page-header">
           <div className="page-title">
-            <h2>Usuarios</h2>
+            <h2>Usuários</h2>
             <p>Visualize perfis cadastrados e mantenha o controle de acessos.</p>
           </div>
-          {canManage && <Button label="Novo usuario" icon="pi pi-plus" onClick={newItem} />}
+          {canManage && <Button label="Novo usuário" icon="pi pi-plus" onClick={newItem} />}
         </div>
 
         <DataTable value={items} paginator rows={10} stripedRows className="data-shell">
@@ -188,31 +207,52 @@ export default function UsersPage() {
           <Column field="role" header="Perfil" />
           <Column
             header="Status"
+            headerStyle={{ textAlign: 'center' }}
+            bodyStyle={{ textAlign: 'center' }}
+            headerClassName="control-column status-column"
+            bodyClassName="control-column-cell status-column"
+            style={{ width: '9rem' }}
             body={(row) => (
-              <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
-                {row.active === false ? 'Inativo' : 'Ativo'}
-              </span>
+              <div className="table-control-cell">
+                <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
+                  {row.active === false ? 'Inativo' : 'Ativo'}
+                </span>
+              </div>
             )}
           />
           <Column
             header="Ações"
+            headerStyle={{ textAlign: 'center' }}
+            bodyStyle={{ textAlign: 'center' }}
+            headerClassName="control-column actions-column"
+            bodyClassName="control-column-cell actions-column"
+            style={{ width: '10rem' }}
             body={(row) => (
-              <div className="row-actions">
-                <Button icon="pi pi-eye" text label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
-                {canManage && <Button icon="pi pi-pencil" text label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
-                {canManage && <Button icon="pi pi-trash" text severity="danger" label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+              <div className="table-control-cell">
+                <div className="row-actions">
+                  <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
+                  {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
+                  {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+                </div>
               </div>
             )}
           />
           {canManage && (
             <Column
               header="Acesso"
+              headerStyle={{ textAlign: 'center' }}
+              bodyStyle={{ textAlign: 'center' }}
+              headerClassName="control-column access-column"
+              bodyClassName="control-column-cell access-column"
+              style={{ width: '13rem' }}
               body={(row) => (
-                <div className="access-action">
-                  <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
-                  <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
-                    {row.active === false ? 'Desativado' : 'Ativado'}
-                  </span>
+                <div className="table-control-cell">
+                  <div className="access-action">
+                    <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
+                    <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
+                      {row.active === false ? 'Desativado' : 'Ativado'}
+                    </span>
+                  </div>
                 </div>
               )}
             />
@@ -234,7 +274,7 @@ export default function UsersPage() {
       </Dialog>
 
       {canManage && (
-        <Dialog header="Usuario" visible={open} style={{ width: '30rem' }} onHide={() => setOpen(false)}>
+        <Dialog header="Usuário" visible={open} style={{ width: '30rem' }} onHide={() => setOpen(false)}>
           <div className="form-col">
             <label>Nome</label>
             <InputText
@@ -278,7 +318,12 @@ export default function UsersPage() {
               }}
             />
 
-            <Button label="Salvar" onClick={save} />
+            <Button
+              label={saving ? (form._id ? 'Editando...' : 'Salvando...') : (form._id ? 'Editar' : 'Salvar')}
+              loading={saving}
+              disabled={saving}
+              onClick={save}
+            />
           </div>
         </Dialog>
       )}

@@ -43,6 +43,7 @@ export default function ProductsPage() {
   const [form, setForm] = useState(emptyForm);
   const [selectedItem, setSelectedItem] = useState(null);
   const [invalidFields, setInvalidFields] = useState({});
+  const [saving, setSaving] = useState(false);
 
   async function load() {
     const data = await request('/products');
@@ -56,12 +57,14 @@ export default function ProductsPage() {
   function newItem() {
     setForm(emptyForm);
     setInvalidFields({});
+    setSaving(false);
     setOpen(true);
   }
 
   function editItem(row) {
     setForm(row);
     setInvalidFields({});
+    setSaving(false);
     setOpen(true);
   }
 
@@ -71,6 +74,10 @@ export default function ProductsPage() {
   }
 
   async function save() {
+    if (saving) {
+      return;
+    }
+
     const nextInvalidFields = {
       name: isBlank(form.name),
       id: isBlank(form.id),
@@ -91,6 +98,7 @@ export default function ProductsPage() {
     }
 
     setInvalidFields({});
+    setSaving(true);
 
     const payload = {
       name: form.name,
@@ -100,6 +108,7 @@ export default function ProductsPage() {
       stock: Number(form.stock || 0)
     };
 
+    try {
     if (form._id) {
       await request(`/products/${form._id}`, {
         method: 'PUT',
@@ -120,6 +129,16 @@ export default function ProductsPage() {
       detail: `${form.name} foi salvo com sucesso.`,
       life: 2500
     });
+    } catch (error) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Falha ao salvar',
+        detail: error.message || 'Não foi possível salvar o produto.',
+        life: 3000
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function removeItem(row) {
@@ -153,7 +172,7 @@ export default function ProductsPage() {
         <div className="page-header">
           <div className="page-title">
             <h2>Produtos</h2>
-            <p>Acompanhe identificacao, preco e estoque em um painel mais limpo.</p>
+            <p>Acompanhe identificação, preço e estoque em um painel mais limpo.</p>
           </div>
           {canManage && <Button label="Novo produto" icon="pi pi-plus" onClick={newItem} />}
         </div>
@@ -168,11 +187,16 @@ export default function ProductsPage() {
             header="Ações"
             headerStyle={{ textAlign: 'center' }}
             bodyStyle={{ textAlign: 'center' }}
+            headerClassName="control-column actions-column"
+            bodyClassName="control-column-cell actions-column"
+            style={{ width: '10rem' }}
             body={(row) => (
-              <div className="row-actions">
-                <Button icon="pi pi-eye" text label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
-                {canManage && <Button icon="pi pi-pencil" text label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
-                {canManage && <Button icon="pi pi-trash" text severity="danger" label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+              <div className="table-control-cell">
+                <div className="row-actions">
+                  <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
+                  {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
+                  {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+                </div>
               </div>
             )}
           />
@@ -187,7 +211,7 @@ export default function ProductsPage() {
           <label>ID</label>
           <InputText value={selectedItem?.id || selectedItem?._id || ''} readOnly />
 
-          <label>Descricao</label>
+          <label>Descrição</label>
           <InputText value={selectedItem?.description || ''} readOnly />
 
           <label>Preço</label>
@@ -221,7 +245,7 @@ export default function ProductsPage() {
               }}
             />
 
-            <label>Descricao</label>
+            <label>Descrição</label>
             <InputText
               className={invalidFields.description ? 'p-invalid' : ''}
               value={form.description}
@@ -251,7 +275,12 @@ export default function ProductsPage() {
               }}
             />
 
-            <Button label="Salvar" onClick={save} />
+            <Button
+              label={saving ? (form._id ? 'Editando...' : 'Salvando...') : (form._id ? 'Editar' : 'Salvar')}
+              loading={saving}
+              disabled={saving}
+              onClick={save}
+            />
           </div>
         </Dialog>
       )}
