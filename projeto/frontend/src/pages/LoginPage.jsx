@@ -44,10 +44,10 @@ export default function LoginPage() {
       <section className="login-card login-card-compact login-card-modern">
         <Card>
           <div className="login-brand login-brand-shell">
-            <div className="brand-mark login-brand-mark">CR</div>
+            <div className="brand-mark login-brand-mark">OG</div>
             <div className="brand-copy">
-              <strong>CRUD React</strong>
-              <span>Painel operacional</span>
+              <strong>Orbe Gestão</strong>
+              <span>Central operacional</span>
             </div>
           </div>
 
