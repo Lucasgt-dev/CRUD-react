@@ -11,6 +11,9 @@ import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { useAuth } from '../context/AuthContext';
 
+const TOAST_LIFE = 4200;
+const TOAST_SUCCESS_LIFE = 3200;
+
 const emptyForm = {
   _id: null,
   name: '',
@@ -92,7 +95,7 @@ export default function ProductsPage() {
         severity: 'warn',
         summary: 'Campos obrigatórios',
         detail: 'Preencha nome, ID, descrição, preço e pelo menos 1 unidade em estoque antes de salvar.',
-        life: 3000
+        life: TOAST_LIFE
       });
       return;
     }
@@ -127,14 +130,14 @@ export default function ProductsPage() {
       severity: 'success',
       summary: form._id ? 'Produto atualizado' : 'Produto criado',
       detail: `${form.name} foi ${form._id ? 'editado' : 'criado'} com sucesso.`,
-      life: 2500
+      life: TOAST_SUCCESS_LIFE
     });
     } catch (error) {
       toast.current?.show({
         severity: 'error',
         summary: 'Falha ao salvar',
         detail: error.message || 'Não foi possível salvar o produto.',
-        life: 3000
+        life: TOAST_LIFE
       });
     } finally {
       setSaving(false);
@@ -156,7 +159,7 @@ export default function ProductsPage() {
           severity: 'success',
           summary: 'Produto removido',
           detail: `${row.name} foi excluído com sucesso.`,
-          life: 2500
+          life: TOAST_SUCCESS_LIFE
         });
       }
     });
@@ -164,7 +167,12 @@ export default function ProductsPage() {
 
   return (
     <div className="page">
-      <Toast ref={toast} position="top-right" />
+      <Toast
+        ref={toast}
+        position="top-right"
+        baseZIndex={open || viewOpen ? 2600 : 1000}
+        className={open || viewOpen ? 'toast-elevated' : ''}
+      />
       <ConfirmDialog />
       <AppMenu />
 

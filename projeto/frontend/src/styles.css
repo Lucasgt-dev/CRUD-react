@@ -1354,6 +1354,12 @@ a {
   color: inherit;
 }
 
+.toast-elevated .p-toast-message {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(14px);
+}
+
 @keyframes fadeUpIn {
   from {
     opacity: 0;

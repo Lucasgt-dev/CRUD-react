@@ -12,6 +12,9 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
 import { useAuth } from '../context/AuthContext';
 
+const TOAST_LIFE = 4200;
+const TOAST_SUCCESS_LIFE = 3200;
+
 const roleOptions = [
   { label: 'Administrador', value: 'adm' },
   { label: 'Usuário', value: 'user' }
@@ -96,7 +99,7 @@ export default function UsersPage() {
           : needsPassword
             ? 'Preencha nome, e-mail, senha e perfil antes de salvar.'
             : 'Preencha nome, e-mail e perfil antes de salvar.',
-        life: 3000
+        life: TOAST_LIFE
       });
       return;
     }
@@ -127,17 +130,17 @@ export default function UsersPage() {
       setOpen(false);
       await load();
       toast.current?.show({
-      severity: 'success',
+        severity: 'success',
         summary: form._id ? 'Usuário atualizado' : 'Usuário criado',
         detail: `${form.name} foi ${form._id ? 'editado' : 'criado'} com sucesso.`,
-        life: 2500
+        life: TOAST_SUCCESS_LIFE
       });
     } catch (error) {
       toast.current?.show({
         severity: 'error',
         summary: 'Falha ao salvar',
         detail: error.message || 'Não foi possível salvar o usuário.',
-        life: 3000
+        life: TOAST_LIFE
       });
     } finally {
       setSaving(false);
@@ -150,7 +153,7 @@ export default function UsersPage() {
         severity: 'warn',
         summary: 'Desative o acesso antes de excluir',
         detail: 'Só é possível excluir usuários com o acesso desativado.',
-        life: 3000
+        life: TOAST_LIFE
       });
       return;
     }
@@ -170,14 +173,14 @@ export default function UsersPage() {
             severity: 'success',
             summary: 'Usuário removido',
             detail: `${row.name} foi excluído com sucesso.`,
-            life: 2500
+            life: TOAST_SUCCESS_LIFE
           });
         } catch (error) {
           toast.current?.show({
             severity: 'warn',
             summary: 'Exclusão não permitida',
             detail: error.message || 'Desative o acesso do usuário antes de excluí-lo.',
-            life: 3000
+            life: TOAST_LIFE
           });
         }
       }
@@ -201,13 +204,18 @@ export default function UsersPage() {
       severity: nextActive ? 'success' : 'warn',
       summary: nextActive ? 'Acesso ativado' : 'Acesso desativado',
       detail: `${row.name} foi ${nextActive ? 'ativado' : 'desativado'} com sucesso.`,
-      life: 2500
+      life: TOAST_SUCCESS_LIFE
     });
   }
 
   return (
     <div className="page">
-      <Toast ref={toast} position="top-right" />
+      <Toast
+        ref={toast}
+        position="top-right"
+        baseZIndex={open || viewOpen ? 2600 : 1000}
+        className={open || viewOpen ? 'toast-elevated' : ''}
+      />
       <ConfirmDialog />
       <AppMenu />
 

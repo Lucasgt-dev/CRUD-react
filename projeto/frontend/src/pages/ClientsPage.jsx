@@ -12,6 +12,9 @@ import { InputMask } from 'primereact/inputmask';
 import { InputSwitch } from 'primereact/inputswitch';
 import { useAuth } from '../context/AuthContext';
 
+const TOAST_LIFE = 4200;
+const TOAST_SUCCESS_LIFE = 3200;
+
 const emptyForm = {
   _id: null,
   name: '',
@@ -93,7 +96,7 @@ export default function ClientsPage() {
         detail: nextInvalidFields.email
           ? 'Informe um e-mail válido antes de salvar.'
           : 'Preencha nome, e-mail, telefone e documento antes de salvar.',
-        life: 3000
+        life: TOAST_LIFE
       });
       return;
     }
@@ -127,14 +130,14 @@ export default function ClientsPage() {
       severity: 'success',
       summary: form._id ? 'Cliente atualizado' : 'Cliente criado',
       detail: `${form.name} foi ${form._id ? 'editado' : 'criado'} com sucesso.`,
-      life: 2500
+      life: TOAST_SUCCESS_LIFE
     });
     } catch (error) {
       toast.current?.show({
         severity: 'error',
         summary: 'Falha ao salvar',
         detail: error.message || 'Não foi possível salvar o cliente.',
-        life: 3000
+        life: TOAST_LIFE
       });
     } finally {
       setSaving(false);
@@ -156,7 +159,7 @@ export default function ClientsPage() {
           severity: 'success',
           summary: 'Cliente removido',
           detail: `${row.name} foi excluído com sucesso.`,
-          life: 2500
+          life: TOAST_SUCCESS_LIFE
         });
       }
     });
@@ -180,13 +183,18 @@ export default function ClientsPage() {
       severity: nextActive ? 'success' : 'warn',
       summary: nextActive ? 'Acesso ativado' : 'Acesso desativado',
       detail: `${row.name} foi ${nextActive ? 'ativado' : 'desativado'} com sucesso.`,
-      life: 2500
+      life: TOAST_SUCCESS_LIFE
     });
   }
 
   return (
     <div className="page">
-      <Toast ref={toast} position="top-right" />
+      <Toast
+        ref={toast}
+        position="top-right"
+        baseZIndex={open || viewOpen ? 2600 : 1000}
+        className={open || viewOpen ? 'toast-elevated' : ''}
+      />
       <ConfirmDialog />
       <AppMenu />
 
