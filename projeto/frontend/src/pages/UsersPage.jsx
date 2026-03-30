@@ -128,8 +128,8 @@ export default function UsersPage() {
       await load();
       toast.current?.show({
       severity: 'success',
-      summary: form._id ? 'Usuário atualizado' : 'Usuário criado',
-      detail: `${form.name} foi salvo com sucesso.`,
+        summary: form._id ? 'Usuário atualizado' : 'Usuário criado',
+        detail: `${form.name} foi ${form._id ? 'editado' : 'criado'} com sucesso.`,
         life: 2500
       });
     } catch (error) {

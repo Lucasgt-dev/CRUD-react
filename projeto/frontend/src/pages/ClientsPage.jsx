@@ -126,7 +126,7 @@ export default function ClientsPage() {
     toast.current?.show({
       severity: 'success',
       summary: form._id ? 'Cliente atualizado' : 'Cliente criado',
-      detail: `${form.name} foi salvo com sucesso.`,
+      detail: `${form.name} foi ${form._id ? 'editado' : 'criado'} com sucesso.`,
       life: 2500
     });
     } catch (error) {
