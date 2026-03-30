@@ -22,10 +22,10 @@ export default function AppMenu() {
   return (
     <aside className="app-sidebar">
       <div className="brand-block">
-        <div className="brand-mark">OG</div>
+        <div className="brand-mark">AG</div>
         <div className="brand-copy">
-          <strong>Orbe Gestão</strong>
-          <span>Central operacional</span>
+          <strong>Atlas Gestão</strong>
+          <span>Painel operacional</span>
         </div>
       </div>
 

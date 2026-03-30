@@ -44,10 +44,10 @@ export default function LoginPage() {
       <section className="login-card login-card-compact login-card-modern">
         <Card>
           <div className="login-brand login-brand-shell">
-            <div className="brand-mark login-brand-mark">OG</div>
+            <div className="brand-mark login-brand-mark">AG</div>
             <div className="brand-copy">
-              <strong>Orbe Gestão</strong>
-              <span>Central operacional</span>
+              <strong>Atlas Gestão</strong>
+              <span>Painel operacional</span>
             </div>
           </div>
 
@@ -55,7 +55,7 @@ export default function LoginPage() {
             <span className="login-kicker">Acesso seguro</span>
             <h1 className="login-title">Login do Sistema</h1>
             <p className="login-subtitle">
-              Entre com suas credenciais para acessar o painel administrativo.
+              Entre com suas credenciais para acessar o painel Atlas e acompanhar a operação em um só lugar.
             </p>
           </div>
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
 
             <div className="login-note">
               <span className="login-note-dot" />
-              <span>Ambiente protegido para acesso administrativo.</span>
+              <span>Ambiente protegido para acesso interno da Atlas Gestão.</span>
             </div>
           </form>
         </Card>
