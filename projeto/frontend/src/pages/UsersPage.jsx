@@ -145,6 +145,16 @@ export default function UsersPage() {
   }
 
   async function removeItem(row) {
+    if (row.active !== false) {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Desative o acesso antes de excluir',
+        detail: 'Só é possível excluir usuários com o acesso desativado.',
+        life: 3000
+      });
+      return;
+    }
+
     confirmDialog({
       message: `Deseja excluir ${row.name}?`,
       header: 'Confirmar exclusão',
@@ -153,14 +163,23 @@ export default function UsersPage() {
       rejectLabel: 'Cancelar',
       acceptClassName: 'p-button-danger',
       accept: async () => {
-        await request(`/users/${row._id}`, { method: 'DELETE' });
-        await load();
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Usuário removido',
-          detail: `${row.name} foi excluído com sucesso.`,
-          life: 2500
-        });
+        try {
+          await request(`/users/${row._id}`, { method: 'DELETE' });
+          await load();
+          toast.current?.show({
+            severity: 'success',
+            summary: 'Usuário removido',
+            detail: `${row.name} foi excluído com sucesso.`,
+            life: 2500
+          });
+        } catch (error) {
+          toast.current?.show({
+            severity: 'warn',
+            summary: 'Exclusão não permitida',
+            detail: error.message || 'Desative o acesso do usuário antes de excluí-lo.',
+            life: 3000
+          });
+        }
       }
     });
   }

@@ -106,6 +106,10 @@ router.delete('/:id', auth, permit('super', 'adm'), async (req, res) => {
     return res.status(403).json({ message: 'Usuário super não pode ser removido pelo CRUD' });
   }
 
+  if (targetUser.active !== false) {
+    return res.status(400).json({ message: 'Só é possível excluir usuários com o acesso desativado' });
+  }
+
   await User.findByIdAndDelete(req.params.id);
   res.json({ message: 'Usuário removido com sucesso' });
 });
