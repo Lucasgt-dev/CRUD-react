@@ -53,12 +53,16 @@ export default function UsersPage() {
 
   async function load() {
     const data = await request('/users');
-    setItems(data);
+    const visibleItems = canManage
+      ? data
+      : data.filter((item) => String(item._id || item.id) === String(user?.id));
+
+    setItems(visibleItems);
   }
 
   useEffect(() => {
     load();
-  }, []);
+  }, [canManage, user?.id]);
 
   useEffect(() => {
     const lastValidFirst = Math.max(0, Math.floor(Math.max(items.length - 1, 0) / PAGE_SIZE) * PAGE_SIZE);

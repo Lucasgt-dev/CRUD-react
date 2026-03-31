@@ -10,16 +10,20 @@ function isValidEmail(value) {
   return emailRegex.test(String(value ?? '').trim());
 }
 
-// LISTAR: todos podem ver, exceto o perfil super que fica invisível no CRUD
+// LISTAR: super e adm veem todos; user comum ve apenas o proprio registro
 router.get('/', auth, permit('super', 'adm', 'user'), async (req, res) => {
-  const users = await User.find({ role: { $ne: 'super' } })
+  const query = req.user.role === 'user'
+    ? { _id: req.user.id, role: { $ne: 'super' } }
+    : { role: { $ne: 'super' } };
+
+  const users = await User.find(query)
     .select('-passwordHash')
     .sort({ createdAt: -1 });
 
   res.json(users);
 });
 
-// CRIAR: só o super e adm, sem permitir criar perfil super pelo CRUD
+// CRIAR: so o super e adm, sem permitir criar perfil super pelo CRUD
 router.post('/', auth, permit('super', 'adm'), async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -29,12 +33,12 @@ router.post('/', auth, permit('super', 'adm'), async (req, res) => {
     }
 
     if (role === 'super') {
-      return res.status(403).json({ message: 'Não é permitido criar usuários super pelo CRUD' });
+      return res.status(403).json({ message: 'Nao e permitido criar usuarios super pelo CRUD' });
     }
 
     const exists = await User.findOne({ email });
     if (exists) {
-      return res.status(400).json({ message: 'E-mail já cadastrado' });
+      return res.status(400).json({ message: 'E-mail ja cadastrado' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -53,26 +57,26 @@ router.post('/', auth, permit('super', 'adm'), async (req, res) => {
       role: user.role
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar usuário', error: error.message });
+    res.status(500).json({ message: 'Erro ao criar usuario', error: error.message });
   }
 });
 
-// EDITAR: só o super e adm, sem permitir alterar perfis super
+// EDITAR: so o super e adm, sem permitir alterar perfis super
 router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
   try {
     const { name, email, role, active, password } = req.body;
     const targetUser = await User.findById(req.params.id);
 
     if (!targetUser) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      return res.status(404).json({ message: 'Usuario nao encontrado' });
     }
 
     if (targetUser.role === 'super') {
-      return res.status(403).json({ message: 'Usuário super não pode ser alterado pelo CRUD' });
+      return res.status(403).json({ message: 'Usuario super nao pode ser alterado pelo CRUD' });
     }
 
     if (role === 'super') {
-      return res.status(403).json({ message: 'Não é permitido promover usuários para super pelo CRUD' });
+      return res.status(403).json({ message: 'Nao e permitido promover usuarios para super pelo CRUD' });
     }
 
     if (!isValidEmail(email)) {
@@ -90,28 +94,28 @@ router.put('/:id', auth, permit('super', 'adm'), async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao atualizar usuário', error: error.message });
+    res.status(500).json({ message: 'Erro ao atualizar usuario', error: error.message });
   }
 });
 
-// EXCLUIR: só super e adm, sem permitir remover perfis super
+// EXCLUIR: so super e adm, sem permitir remover perfis super
 router.delete('/:id', auth, permit('super', 'adm'), async (req, res) => {
   const targetUser = await User.findById(req.params.id);
 
   if (!targetUser) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+    return res.status(404).json({ message: 'Usuario nao encontrado' });
   }
 
   if (targetUser.role === 'super') {
-    return res.status(403).json({ message: 'Usuário super não pode ser removido pelo CRUD' });
+    return res.status(403).json({ message: 'Usuario super nao pode ser removido pelo CRUD' });
   }
 
   if (targetUser.active !== false) {
-    return res.status(400).json({ message: 'Só é possível excluir usuários com o acesso desativado' });
+    return res.status(400).json({ message: 'So e possivel excluir usuarios com o acesso desativado' });
   }
 
   await User.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Usuário removido com sucesso' });
+  res.json({ message: 'Usuario removido com sucesso' });
 });
 
 export default router;
