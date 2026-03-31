@@ -1,7 +1,75 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Button } from 'primereact/button';
+import { Sidebar } from 'primereact/sidebar';
 import { useAuth } from '../context/AuthContext';
+
+function MenuContent({
+  links,
+  location,
+  closeSidebar,
+  logout,
+  user,
+  userRoleClass,
+  userInitials,
+  mobile = false
+}) {
+  return (
+    <>
+      {mobile && (
+        <div className="app-sidebar-mobile-head">
+          <span className="app-sidebar-mobile-kicker">Menu</span>
+          <Button
+            type="button"
+            icon="pi pi-times"
+            rounded
+            text
+            aria-label="Fechar menu"
+            className="app-sidebar-close"
+            onClick={closeSidebar}
+          />
+        </div>
+      )}
+
+      <div className="brand-block">
+        <div className="brand-mark">AG</div>
+        <div className="brand-copy">
+          <strong>Atlas Gestão</strong>
+          <span>Painel operacional</span>
+        </div>
+      </div>
+
+      <div className="menu-links">
+        {links.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={`menu-link ${location.pathname === link.to ? 'active' : ''}`}
+            onClick={closeSidebar}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+
+      <div className="menu-right">
+        <div className="user-chip">
+          <div className={`user-mark ${userRoleClass}`}>{userInitials}</div>
+          <span>{user?.name} ({user?.role})</span>
+        </div>
+        <Button
+          label="Sair"
+          icon="pi pi-sign-out"
+          severity="danger"
+          onClick={() => {
+            closeSidebar();
+            logout();
+          }}
+        />
+      </div>
+    </>
+  );
+}
 
 export default function AppMenu() {
   const { user, logout } = useAuth();
@@ -27,32 +95,6 @@ export default function AppMenu() {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (!sidebarOpen) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        setSidebarOpen(false);
-      }
-    };
-    const handleResize = () => {
-      if (window.innerWidth > 980) {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleEscape);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleEscape);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [sidebarOpen]);
-
   const closeSidebar = () => setSidebarOpen(false);
 
   return (
@@ -66,64 +108,41 @@ export default function AppMenu() {
         onClick={() => setSidebarOpen(true)}
       />
 
-      <button
-        type="button"
-        className={`app-sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
-        aria-label="Fechar menu"
-        onClick={closeSidebar}
-      />
-
-      <aside className={`app-sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
-        <div className="app-sidebar-mobile-head">
-          <span className="app-sidebar-mobile-kicker">Menu</span>
-          <Button
-            type="button"
-            icon="pi pi-times"
-            rounded
-            text
-            aria-label="Fechar menu"
-            className="app-sidebar-close"
-            onClick={closeSidebar}
-          />
-        </div>
-
-        <div className="brand-block">
-          <div className="brand-mark">AG</div>
-          <div className="brand-copy">
-            <strong>Atlas Gestão</strong>
-            <span>Painel operacional</span>
-          </div>
-        </div>
-
-        <div className="menu-links">
-          {links.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`menu-link ${location.pathname === link.to ? 'active' : ''}`}
-              onClick={closeSidebar}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="menu-right">
-          <div className="user-chip">
-            <div className={`user-mark ${userRoleClass}`}>{userInitials}</div>
-            <span>{user?.name} ({user?.role})</span>
-          </div>
-          <Button
-            label="Sair"
-            icon="pi pi-sign-out"
-            severity="danger"
-            onClick={() => {
-              closeSidebar();
-              logout();
-            }}
-          />
-        </div>
+      <aside className="app-sidebar app-sidebar-desktop">
+        <MenuContent
+          links={links}
+          location={location}
+          closeSidebar={closeSidebar}
+          logout={logout}
+          user={user}
+          userRoleClass={userRoleClass}
+          userInitials={userInitials}
+        />
       </aside>
+
+      <Sidebar
+        visible={sidebarOpen}
+        onHide={closeSidebar}
+        showCloseIcon={false}
+        dismissable
+        blockScroll
+        className="app-sidebar-mobile-panel"
+        modal
+        position="left"
+      >
+        <div className="app-sidebar app-sidebar-mobile">
+          <MenuContent
+            links={links}
+            location={location}
+            closeSidebar={closeSidebar}
+            logout={logout}
+            user={user}
+            userRoleClass={userRoleClass}
+            userInitials={userInitials}
+            mobile
+          />
+        </div>
+      </Sidebar>
     </div>
   );
 }
