@@ -1007,7 +1007,7 @@ a {
 
 .mobile-card-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -1076,6 +1076,22 @@ a {
 
 .mobile-card-shell .p-paginator {
   margin-top: 4px;
+}
+
+@media (max-width: 1320px) {
+  .table-desktop {
+    display: none;
+  }
+
+  .mobile-card-shell {
+    display: block;
+  }
+
+  .page {
+    grid-template-columns: 248px minmax(0, 1fr);
+    gap: 20px;
+    padding: 16px;
+  }
 }
 
 .data-shell .p-datatable-thead > tr > th {
@@ -1727,6 +1743,10 @@ a {
 
   .mobile-card-shell {
     display: block;
+  }
+
+  .mobile-card-grid {
+    grid-template-columns: 1fr;
   }
 
   .center-screen::before {
