@@ -961,6 +961,123 @@ a {
   min-width: 720px;
 }
 
+.table-desktop {
+  display: block;
+}
+
+.mobile-card-shell {
+  display: none;
+  padding: 16px;
+}
+
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobile-data-card {
+  border: 1px solid #e6edf5;
+  border-radius: 20px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 253, 0.96) 100%);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.mobile-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.mobile-card-title-block {
+  min-width: 0;
+}
+
+.mobile-card-title-block strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #13233f;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.mobile-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.mobile-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mobile-card-field-full {
+  grid-column: 1 / -1;
+}
+
+.mobile-card-label,
+.mobile-card-section-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71839a;
+}
+
+.mobile-card-value {
+  color: #22324a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.mobile-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e6edf5;
+}
+
+.mobile-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-card-head .table-control-cell {
+  width: auto;
+  min-height: auto;
+}
+
+.mobile-card-footer .table-control-cell {
+  justify-content: flex-start;
+  min-height: auto;
+}
+
+.mobile-card-footer .row-actions {
+  justify-content: flex-start;
+}
+
+.mobile-card-footer .access-action {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.mobile-card-shell .p-paginator {
+  margin-top: 4px;
+}
+
 .data-shell .p-datatable-thead > tr > th {
   background: linear-gradient(180deg, #f7faff 0%, #f1f6fc 100%);
   color: #3f4b59;
@@ -1604,6 +1721,14 @@ a {
     padding: 14px;
   }
 
+  .table-desktop {
+    display: none;
+  }
+
+  .mobile-card-shell {
+    display: block;
+  }
+
   .center-screen::before {
     width: 11rem;
     height: 11rem;
@@ -1809,12 +1934,29 @@ a {
     font-size: 0.8rem;
   }
 
+  .mobile-data-card {
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .mobile-card-title-block strong {
+    font-size: 0.96rem;
+  }
+
+  .mobile-card-value {
+    font-size: 0.92rem;
+  }
+
 }
 
 @media (max-width: 560px) {
   .page,
   .center-screen {
     padding: 10px;
+  }
+
+  .mobile-card-shell {
+    padding: 12px;
   }
 
   .app-sidebar-mobile-panel.p-sidebar {
@@ -1952,12 +2094,35 @@ a {
     padding: 0.34rem 0.6rem;
     font-size: 0.76rem;
   }
+
+  .mobile-data-card {
+    padding: 13px;
+    border-radius: 16px;
+  }
+
+  .mobile-card-head,
+  .mobile-card-footer {
+    gap: 10px;
+  }
+
+  .mobile-card-label,
+  .mobile-card-section-title {
+    font-size: 0.68rem;
+  }
+
+  .mobile-card-value {
+    font-size: 0.88rem;
+  }
 }
 
 @media (max-width: 420px) {
   .page,
   .center-screen {
     padding: 8px;
+  }
+
+  .mobile-card-shell {
+    padding: 10px;
   }
 
   .center-screen::before,
@@ -2087,5 +2252,17 @@ a {
     min-width: 3.45rem;
     padding: 0.3rem 0.54rem;
     font-size: 0.72rem;
+  }
+
+  .mobile-data-card {
+    padding: 12px;
+  }
+
+  .mobile-card-title-block strong {
+    font-size: 0.92rem;
+  }
+
+  .mobile-card-value {
+    font-size: 0.84rem;
   }
 }

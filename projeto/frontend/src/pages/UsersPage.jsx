@@ -7,6 +7,7 @@ import { Toast } from 'primereact/toast';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Paginator } from 'primereact/paginator';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
@@ -14,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 
 const TOAST_LIFE = 4200;
 const TOAST_SUCCESS_LIFE = 3200;
+const PAGE_SIZE = 10;
 
 const roleOptions = [
   { label: 'Administrador', value: 'adm' },
@@ -47,6 +49,7 @@ export default function UsersPage() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [invalidFields, setInvalidFields] = useState({});
   const [saving, setSaving] = useState(false);
+  const [first, setFirst] = useState(0);
 
   async function load() {
     const data = await request('/users');
@@ -56,6 +59,13 @@ export default function UsersPage() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    const lastValidFirst = Math.max(0, Math.floor(Math.max(items.length - 1, 0) / PAGE_SIZE) * PAGE_SIZE);
+    if (first > lastValidFirst) {
+      setFirst(lastValidFirst);
+    }
+  }, [items.length, first]);
 
   function newItem() {
     setForm(emptyForm);
@@ -208,6 +218,43 @@ export default function UsersPage() {
     });
   }
 
+  const currentItems = items.slice(first, first + PAGE_SIZE);
+
+  function renderStatus(row) {
+    return (
+      <div className="table-control-cell">
+        <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
+          {row.active === false ? 'Inativo' : 'Ativo'}
+        </span>
+      </div>
+    );
+  }
+
+  function renderActions(row) {
+    return (
+      <div className="table-control-cell">
+        <div className="row-actions">
+          <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
+          {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
+          {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+        </div>
+      </div>
+    );
+  }
+
+  function renderAccess(row) {
+    return (
+      <div className="table-control-cell">
+        <div className="access-action">
+          <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
+          <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
+            {row.active === false ? 'Desativado' : 'Ativado'}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <Toast
@@ -229,7 +276,7 @@ export default function UsersPage() {
           {canManage && <Button label="Novo usuário" icon="pi pi-plus" onClick={newItem} />}
         </div>
 
-        <DataTable value={items} paginator rows={10} stripedRows className="data-shell">
+        <DataTable value={items} paginator rows={PAGE_SIZE} first={first} onPage={(e) => setFirst(e.first)} stripedRows className="data-shell table-desktop">
           <Column field="name" header="Nome" />
           <Column field="email" header="E-mail" />
           <Column field="role" header="Perfil" />
@@ -240,13 +287,7 @@ export default function UsersPage() {
             headerClassName="control-column status-column"
             bodyClassName="control-column-cell status-column"
             style={{ width: '9rem' }}
-            body={(row) => (
-              <div className="table-control-cell">
-                <span className={`status-badge ${row.active === false ? 'is-inactive' : 'is-active'}`}>
-                  {row.active === false ? 'Inativo' : 'Ativo'}
-                </span>
-              </div>
-            )}
+            body={renderStatus}
           />
           <Column
             header="Ações"
@@ -255,15 +296,7 @@ export default function UsersPage() {
             headerClassName="control-column actions-column"
             bodyClassName="control-column-cell actions-column"
             style={{ width: '10rem' }}
-            body={(row) => (
-              <div className="table-control-cell">
-                <div className="row-actions">
-                  <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
-                  {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
-                  {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
-                </div>
-              </div>
-            )}
+            body={renderActions}
           />
           {canManage && (
             <Column
@@ -273,19 +306,53 @@ export default function UsersPage() {
               headerClassName="control-column access-column"
               bodyClassName="control-column-cell access-column"
               style={{ width: '13rem' }}
-              body={(row) => (
-                <div className="table-control-cell">
-                  <div className="access-action">
-                    <InputSwitch checked={row.active !== false} onChange={(e) => toggleActive(row, e.value)} />
-                    <span className={`access-label ${row.active === false ? 'is-off' : 'is-on'}`}>
-                      {row.active === false ? 'Desativado' : 'Ativado'}
-                    </span>
-                  </div>
-                </div>
-              )}
+              body={renderAccess}
             />
           )}
         </DataTable>
+
+        <div className="data-shell mobile-card-shell">
+          <div className="mobile-card-list">
+            {currentItems.map((row) => (
+              <article key={row._id} className="mobile-data-card">
+                <div className="mobile-card-head">
+                  <div className="mobile-card-title-block">
+                    <strong>{row.name}</strong>
+                  </div>
+                  {renderStatus(row)}
+                </div>
+
+                <div className="mobile-card-grid">
+                  <div className="mobile-card-field mobile-card-field-full">
+                    <span className="mobile-card-label">E-mail</span>
+                    <span className="mobile-card-value">{row.email}</span>
+                  </div>
+
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Perfil</span>
+                    <span className="mobile-card-value">{row.role}</span>
+                  </div>
+                </div>
+
+                <div className="mobile-card-footer">
+                  <div className="mobile-card-section">
+                    <span className="mobile-card-section-title">Ações</span>
+                    {renderActions(row)}
+                  </div>
+
+                  {canManage && (
+                    <div className="mobile-card-section">
+                      <span className="mobile-card-section-title">Acesso</span>
+                      {renderAccess(row)}
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <Paginator first={first} rows={PAGE_SIZE} totalRecords={items.length} onPageChange={(e) => setFirst(e.first)} />
+        </div>
       </div>
 
       <Dialog header="Visualizar usuário" visible={viewOpen} style={{ width: '30rem' }} onHide={() => setViewOpen(false)}>

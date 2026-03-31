@@ -7,12 +7,14 @@ import { Toast } from 'primereact/toast';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Paginator } from 'primereact/paginator';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { useAuth } from '../context/AuthContext';
 
 const TOAST_LIFE = 4200;
 const TOAST_SUCCESS_LIFE = 3200;
+const PAGE_SIZE = 10;
 
 const emptyForm = {
   _id: null,
@@ -47,6 +49,7 @@ export default function ProductsPage() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [invalidFields, setInvalidFields] = useState({});
   const [saving, setSaving] = useState(false);
+  const [first, setFirst] = useState(0);
 
   async function load() {
     const data = await request('/products');
@@ -56,6 +59,13 @@ export default function ProductsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    const lastValidFirst = Math.max(0, Math.floor(Math.max(items.length - 1, 0) / PAGE_SIZE) * PAGE_SIZE);
+    if (first > lastValidFirst) {
+      setFirst(lastValidFirst);
+    }
+  }, [items.length, first]);
 
   function newItem() {
     setForm(emptyForm);
@@ -165,6 +175,20 @@ export default function ProductsPage() {
     });
   }
 
+  const currentItems = items.slice(first, first + PAGE_SIZE);
+
+  function renderActions(row) {
+    return (
+      <div className="table-control-cell">
+        <div className="row-actions">
+          <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
+          {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
+          {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <Toast
@@ -186,7 +210,7 @@ export default function ProductsPage() {
           {canManage && <Button label="Novo produto" icon="pi pi-plus" onClick={newItem} />}
         </div>
 
-        <DataTable value={items} paginator rows={10} stripedRows className="data-shell">
+        <DataTable value={items} paginator rows={PAGE_SIZE} first={first} onPage={(e) => setFirst(e.first)} stripedRows className="data-shell table-desktop">
           <Column field="name" header="Nome" />
           <Column header="ID" body={(row) => row.id || row._id} />
           <Column field="description" header="Descrição" />
@@ -199,17 +223,54 @@ export default function ProductsPage() {
             headerClassName="control-column actions-column"
             bodyClassName="control-column-cell actions-column"
             style={{ width: '10rem' }}
-            body={(row) => (
-              <div className="table-control-cell">
-                <div className="row-actions">
-                  <Button icon="pi pi-eye" text tooltip="Visualizar" tooltipOptions={{ position: 'top' }} aria-label="Visualizar" className="action-button action-view" onClick={() => viewItem(row)} />
-                  {canManage && <Button icon="pi pi-pencil" text tooltip="Editar" tooltipOptions={{ position: 'top' }} aria-label="Editar" className="action-button action-edit" onClick={() => editItem(row)} />}
-                  {canManage && <Button icon="pi pi-trash" text severity="danger" tooltip="Excluir" tooltipOptions={{ position: 'top' }} aria-label="Excluir" className="action-button action-delete" onClick={() => removeItem(row)} />}
-                </div>
-              </div>
-            )}
+            body={renderActions}
           />
         </DataTable>
+
+        <div className="data-shell mobile-card-shell">
+          <div className="mobile-card-list">
+            {currentItems.map((row) => (
+              <article key={row._id} className="mobile-data-card">
+                <div className="mobile-card-head">
+                  <div className="mobile-card-title-block">
+                    <strong>{row.name}</strong>
+                  </div>
+                </div>
+
+                <div className="mobile-card-grid">
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">ID</span>
+                    <span className="mobile-card-value">{row.id || row._id}</span>
+                  </div>
+
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Preço</span>
+                    <span className="mobile-card-value">{currencyFormatter.format(Number(row.price || 0))}</span>
+                  </div>
+
+                  <div className="mobile-card-field">
+                    <span className="mobile-card-label">Estoque</span>
+                    <span className="mobile-card-value">{`${Number(row.stock || 0)} unidades`}</span>
+                  </div>
+
+                  <div className="mobile-card-field mobile-card-field-full">
+                    <span className="mobile-card-label">Descrição</span>
+                    <span className="mobile-card-value">{row.description}</span>
+                  </div>
+                </div>
+
+                <div className="mobile-card-footer">
+                  <div className="mobile-card-section">
+                    <span className="mobile-card-section-title">Ações</span>
+                    {renderActions(row)}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <Paginator first={first} rows={PAGE_SIZE} totalRecords={items.length} onPageChange={(e) => setFirst(e.first)} />
+        </div>
       </div>
 
       <Dialog header="Visualizar produto" visible={viewOpen} style={{ width: '30rem' }} onHide={() => setViewOpen(false)}>
