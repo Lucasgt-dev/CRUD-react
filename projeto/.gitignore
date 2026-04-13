@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sensitive environment files
+.env
+.env.*
+backend/.env
+frontend/.env
