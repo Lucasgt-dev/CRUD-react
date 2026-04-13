@@ -1,51 +1,28 @@
-# CRUD React
+# Projeto
 
-Projeto com frontend em React/Vite e backend em Express/MongoDB.
+A documentacao principal do repositorio esta no [README da raiz](../README.md).
 
-## Rodando localmente
+## Comandos rapidos
 
-### Frontend
+Os comandos abaixo partem da raiz do repositorio.
 
-No diretório `projeto`:
+Frontend:
 
-```powershell
-npm.cmd run dev
+```bash
+cd projeto
+npm run dev
 ```
 
-O frontend usa `VITE_API_URL` quando essa variável existir. Sem ela, o padrão é `http://localhost:5000/api`.
+Backend:
 
-### Backend
-
-No diretório `projeto/backend`:
-
-```powershell
-npm.cmd run dev
+```bash
+cd projeto/backend
+npm run dev
 ```
 
-Se precisar criar o super usuário:
+Seed do super usuario:
 
-```powershell
-npm.cmd run seed:super
-```
-
-## Deploy no Render
-
-O repositório já inclui um arquivo `render.yaml` na raiz para criar o backend como `Web Service`.
-
-Variáveis de ambiente esperadas no Render:
-
-- `MONGODB_URI`
-- `JWT_SECRET`
-- `SUPER_PASSWORD`
-- `CORS_ORIGIN`
-
-Valores que você provavelmente vai usar:
-
-- `CORS_ORIGIN=https://seu-frontend.onrender.com`
-- `PORT` não precisa ser definido manualmente no Render
-
-Depois de publicar o backend, configure o frontend com:
-
-```env
-VITE_API_URL=https://seu-backend.onrender.com/api
+```bash
+cd projeto/backend
+npm run seed:super
 ```
